@@ -16,11 +16,11 @@ import java.io.IOException;
 import java.lang.ref.Cleaner;
 
 public class Execute {
-    public Execute(boolean isFromFile, BufferedReader bufferedReader){
-        execute(isFromFile, bufferedReader, null);
+    public Execute(BufferedReader bufferedReader){
+        execute(bufferedReader, null);
     }
 
-    public static Request execute(boolean isFromFile, BufferedReader br, Route route){
+    public static Request execute(BufferedReader br, Route route){
         String path = "";
         String line = "";
         Show show = new Show();
@@ -31,9 +31,10 @@ public class Execute {
         while(true) {
             try {
                 while ((line = br.readLine()) != null) {
-                    line.replaceAll("\n", "");
-                    line.trim();
+                    line = line.replaceAll("\n", "");
+                    line = line.trim();
                     String[] ln = line.split(" ");
+                    System.out.println(ln[0] + ' ' + ln.length);
                     switch (ln[0]) {
                         case "help":
                             if (ln.length == 1) {
@@ -46,11 +47,13 @@ public class Execute {
 
                         case "info":
                             if (ln.length == 1) {
+                                System.out.println(2);
                                 Info info = new Info();
                                 info.execute();
                             } else {
                                 throw new IllegalCommandException("Unknown info_<...> command");
                             }
+                            break;
 
                         case "show":
                             if (ln.length == 1) {
@@ -58,12 +61,15 @@ public class Execute {
                             } else {
                                 throw new IllegalCommandException("Unknown show_<...> command");
                             }
+                            break;
                         case "add":
+                            System.out.println(1);
                             if (ln.length == 1){
                                 collectionManager.addInCollection(route);
                             } else {
                                 throw new IllegalCommandException("Unknown show_<...> command");
                             }
+                            break;
 
                         case "update":
                             if (ln.length == 2){
@@ -72,6 +78,7 @@ public class Execute {
                             } else {
                                 throw new IllegalCommandException("Unknown show_<...> command");
                             }
+                            break;
                         case "remove_by_id":
                             if (ln.length == 2){
                                 RemoveByID removeByID = new RemoveByID();
@@ -79,12 +86,14 @@ public class Execute {
                             } else {
                                 throw new IllegalCommandException("Unknown show_<...> command");
                             }
+                            break;
                         case "clear":
                             if (ln.length == 1){
                                 collectionManager.clear();
                             } else {
                                 throw new IllegalCommandException("Unknown show_<...> command");
                             }
+                            break;
                         case "exit":
                             throw new ExitException();
                         case "add_if_max":
@@ -94,6 +103,7 @@ public class Execute {
                             } else {
                                 throw new IllegalCommandException("Unknown show_<...> command");
                             }
+                            break;
                         case "add_if_min":
                             if (ln.length == 1){
                                 AddIfMin addIfMin = new AddIfMin();
@@ -101,6 +111,7 @@ public class Execute {
                             } else {
                                 throw new IllegalCommandException("Unknown show_<...> command");
                             }
+                            break;
                         case "remove_lower":
                             if (ln.length == 1){
                                 RemoveLower removeLower = new RemoveLower();
@@ -108,6 +119,7 @@ public class Execute {
                             } else {
                                 throw new IllegalCommandException("Unknown show_<...> command");
                             }
+                            break;
                         case "min_by_id":
                             if (ln.length == 1){
                                 MinByID minByID = new MinByID();
@@ -115,6 +127,7 @@ public class Execute {
                             } else {
                                 throw new IllegalCommandException("Unknown show_<...> command");
                             }
+                            break;
                         case "group_counting_by_distance":
                             if (ln.length == 1){
                                 GroupCountingByDistance groupCountingByDistance = new GroupCountingByDistance();
@@ -122,6 +135,7 @@ public class Execute {
                             } else {
                                 throw new IllegalCommandException("Unknown show_<...> command");
                             }
+                            break;
                         case "count_by_distance":
                             if (ln.length == 2){
                                 CountByDistance countByDistance = new CountByDistance();
@@ -129,6 +143,7 @@ public class Execute {
                             } else {
                                 throw new IllegalCommandException("Unknown show_<...> command");
                             }
+                            break;
                         case "execute_script":
 //                            ExecuteScript executeScript = new ExecuteScript();
 //                            executeScript.execute(br, ln[1]);

@@ -1,6 +1,8 @@
 package com.Data;
 
-public class Coordinates {
+import java.io.Serializable;
+
+public class Coordinates implements Serializable {
     public Long x; //Поле не может быть null
     public Double y; //Максимальное значение поля: 2, Поле не может быть null
     public Double z;

@@ -24,7 +24,7 @@ public abstract class ExecuteRequest {
         ReportState stateAnswer = ReportState.OK;
         answer = new StringBuilder();
         try {
-            Execute.execute(false, brOfCommands, request.getObjectArgument() == "null" ? null : (Route)request.getObjectArgument());
+            Execute.execute(brOfCommands, request.getObjectArgument() == "null" ? null : (Route)request.getObjectArgument());
             stateAnswer = ReportState.OK;
         } catch (ExitException e) {
             stateAnswer = ReportState.SERVER_DIE;
