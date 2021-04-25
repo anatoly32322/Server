@@ -40,7 +40,7 @@ public class CommandsManager {
      */
     private void info() throws IllegalAccessException {
         Info info = new Info();
-        info.execute(collectionManager.getData(), collectionManager.getDate(), show());
+        info.execute();
     }
 
     /**
@@ -50,7 +50,7 @@ public class CommandsManager {
      */
     private String show() throws IllegalAccessException {
         Show show = new Show();
-        return show.execute(collectionManager.getData());
+        return show.execute(true);
     }
 
     /**
@@ -83,13 +83,7 @@ public class CommandsManager {
         save.execute(path);
     }
 
-    /**
-     * Этот метод считывает и исполняет скрипт из указанного файла
-     */
-    private void execute_script(BufferedReader br) {
-        ExecuteScript executeScript = new ExecuteScript();
-        executeScript.execute(br, path);
-    }
+
 
     /**
      * Этот метод завершает программу

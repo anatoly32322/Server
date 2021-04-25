@@ -42,10 +42,10 @@ public class Input {
                             break;
                         case "info":
                             Info info = new Info();
-                            info.execute(collectionManager.getData(), collectionManager.getDate(), show.execute(collectionManager.getData()));
+                            info.execute();
                             break;
                         case "show":
-                            System.out.println(show.execute(collectionManager.getData()));
+                            System.out.println(show.execute(true));
                             break;
                         case "add":
                             rt = getRoute.execute(br);
@@ -97,11 +97,6 @@ public class Input {
                         case "count_by_distance":
                             CountByDistance countByDistance = new CountByDistance();
                             countByDistance.execute(Long.parseLong(ln[1]));
-                            break;
-                        case "execute_script":
-                            System.out.println("Введите путь до файла.");
-                            ExecuteScript executeScript = new ExecuteScript();
-                            executeScript.execute(br, PATH);
                             break;
                         default:
                             throw new WrongInputException("Введена неверная команда. Повторите ввод.");

@@ -25,13 +25,11 @@ public class Execute {
         String line = "";
         Show show = new Show();
         String[] fields = new String[]{"name", "coordinates", "from", "to"};
-        GetRouteScript getRouteScript = new GetRouteScript();
+//        GetRouteScript getRouteScript = new GetRouteScript();
         Route rt = new Route();
         CollectionManager collectionManager = new CollectionManager();
         while(true) {
             try {
-                path = br.readLine();
-                br = new BufferedReader(new FileReader(path));
                 while ((line = br.readLine()) != null) {
                     line.replaceAll("\n", "");
                     line.trim();

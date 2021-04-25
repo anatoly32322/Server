@@ -39,10 +39,10 @@ public class Server {
                         System.out.println(Arrays.toString(userCommand));
                         if (userCommand[0].equals("save") || userCommand[0].equals("exit")) {
                             if (userCommand[0].equals("save") || userCommand.length == 2) {
-                                Execute.execute(true, new BufferedReader(new StringReader("save\n" + userCommand[1] + "\nexit")));
+                                Execute.execute(true, new BufferedReader(new StringReader("save\n" + userCommand[1] + "\nexit")), null);
                             }
                             if (userCommand[0].equals("exit")) {
-                                Execute.execute(true, new BufferedReader(new StringReader("exit")));
+                                Execute.execute(true, new BufferedReader(new StringReader("exit")), null);
                             }
                         } else {
                             System.out.println("Server has command save and command exit as well!");
