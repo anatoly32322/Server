@@ -12,9 +12,7 @@ public class Info {
     public Info() {}
 
     public void execute(){
-        System.out.println(3);
         Class cl = collectionManager.getData().getClass();
-        System.out.println(4);
         String report = "Название контейнера: " + cl.getName() + '\n' + "Время создания: " + collectionManager.getDate() + '\n' + "Данные хранимые в контейнере:\n" + collectionManager.toString() + '\n';
         System.out.println(report);
         ExecuteRequest.answer.append(report);

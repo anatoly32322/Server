@@ -60,7 +60,7 @@ public class CommandsManager {
      * @throws NoSuchFieldException
      * @throws IllegalAccessException
      */
-    private void updateByID(int id, Route a) throws NoSuchFieldException, IllegalAccessException {
+    private void updateByID(int id, Route a) throws NoSuchFieldException, IllegalAccessException, IOException {
         Update update = new Update();
         update.execute(id, a);
     }
@@ -69,7 +69,7 @@ public class CommandsManager {
      * Этот метод удаляет элемент из коллекции по его id
      * @param id Передаваемый id
      */
-    private void remove_by_id(int id) {
+    private void remove_by_id(int id) throws IOException {
         RemoveByID removeByID = new RemoveByID();
         removeByID.execute(id);
     }
@@ -80,7 +80,7 @@ public class CommandsManager {
      */
     private void save() throws IOException {
         Save save = new Save();
-        save.execute(path);
+        save.execute();
     }
 
 
@@ -96,7 +96,7 @@ public class CommandsManager {
      * Этот метод добавляет элемент в коллекцию, если его значение поля distance превышает наибольшее значение элемента коллекции
      * @param a Передаваемый объект класса Route
      */
-    private void add_if_max(Route a) {
+    private void add_if_max(Route a) throws IOException {
         AddIfMax addIfMax = new AddIfMax();
         addIfMax.execute(a);
     }
@@ -108,7 +108,7 @@ public class CommandsManager {
      * Этот метод добавляет элемент в коллекцию, если его значение поля distance меньше, чем наименьшее значение элемента коллекции
      * @param a Передаваемый объект класса Route
      */
-    private void add_if_min(Route a) {
+    private void add_if_min(Route a) throws IOException {
         AddIfMin addIfMin = new AddIfMin();
         addIfMin.execute(a);
     }
@@ -117,7 +117,7 @@ public class CommandsManager {
      * Этот метод удаляет элементы из коллекции, меньшие, чем заданный
      * @param a Передаваемый объект класса Route
      */
-    private void remove_lower(Route a) {
+    private void remove_lower(Route a) throws IOException {
         RemoveLower removeLower = new RemoveLower();
         removeLower.execute(a);
     }
@@ -180,7 +180,7 @@ public class CommandsManager {
      */
     private void readCSVFile(String path) throws IOException {
         ReadCSV readCSV = new ReadCSV();
-        readCSV.execute(path);
+        readCSV.execute();
     }
 
     public void input(String path)  {

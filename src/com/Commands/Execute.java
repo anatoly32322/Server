@@ -2,6 +2,7 @@ package com.Commands;
 
 import com.AuxiliaryCommands.GetRoute;
 import com.AuxiliaryCommands.GetRouteScript;
+import com.AuxiliaryCommands.ReadCSV;
 import com.CollectionManager;
 import com.Data.Request;
 import com.Data.Route;
@@ -16,13 +17,14 @@ import java.io.IOException;
 import java.lang.ref.Cleaner;
 
 public class Execute {
-    public Execute(BufferedReader bufferedReader){
+    public static String path;
+    public Execute(BufferedReader bufferedReader, String path) throws IOException {
         execute(bufferedReader, null);
     }
 
-    public static Request execute(BufferedReader br, Route route){
-        String path = "";
+    public static Request execute(BufferedReader br, Route route) throws IOException {
         String line = "";
+
         Show show = new Show();
         String[] fields = new String[]{"name", "coordinates", "from", "to"};
 //        GetRouteScript getRouteScript = new GetRouteScript();
@@ -66,6 +68,8 @@ public class Execute {
                             System.out.println(1);
                             if (ln.length == 1){
                                 collectionManager.addInCollection(route);
+                                Save save = new Save();
+                                save.execute();
                             } else {
                                 throw new IllegalCommandException("Unknown show_<...> command");
                             }

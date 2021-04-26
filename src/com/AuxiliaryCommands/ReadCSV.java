@@ -1,6 +1,7 @@
 package com.AuxiliaryCommands;
 
 import com.CollectionManager;
+import com.Commands.Execute;
 import com.Data.Coordinates;
 import com.Data.Location;
 import com.Data.Route;
@@ -15,7 +16,8 @@ public class ReadCSV {
 
     public ReadCSV(){}
 
-    public void execute(String path) throws IOException {
+    public void execute() throws IOException {
+        String path = Execute.path;
         String[] fields = new String[]{"id", "name", "coordinates", "creationDate", "from", "to", "distance"};
         try {
             BufferedReader br = new BufferedReader(new FileReader(path));

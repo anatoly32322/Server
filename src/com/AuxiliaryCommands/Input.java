@@ -18,7 +18,7 @@ public class Input {
     public void execute(String PATH){
         try {
             ReadCSV readCSV = new ReadCSV();
-            readCSV.execute(PATH);
+            readCSV.execute();
         } catch(IOException e){
             e.printStackTrace();
             System.exit(0);
@@ -65,7 +65,7 @@ public class Input {
                             break;
                         case "save":
                             Save save = new Save();
-                            save.execute(PATH);
+                            save.execute();
                             break;
                         case "exit":
                             Exit exit = new Exit();

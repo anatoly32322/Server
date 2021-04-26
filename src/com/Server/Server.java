@@ -19,13 +19,15 @@ public class Server {
     private int PORT;
     private InetAddress address;
     private DatagramSocket socket;
+    private String path;
 
     private BufferedReader br;
     private CollectionManager collectionManager;
 
-    public Server(int port, BufferedReader br) {
+    public Server(int port, BufferedReader br, String path) {
         PORT = port;
         this.br = br;
+        this.path = path;
     }
 
     public void run() {
@@ -73,14 +75,11 @@ public class Server {
             byte[] accept = new byte[16384];
             DatagramPacket getPacket = new DatagramPacket(accept, accept.length);
 
-            //Getting a new request from client and doing it
             socket.receive(getPacket);
 
-            //Save path to client
             address = getPacket.getAddress();
             PORT = getPacket.getPort();
 
-            //invoke the command
             request = deserialize(getPacket);
             report = ExecuteRequest.doingRequest(request);
 
@@ -92,7 +91,6 @@ public class Server {
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         } finally {
-            //Sending a report to client
             byte[] sendBuffer = new byte[0];
             try {
                 sendBuffer = serialize(report);

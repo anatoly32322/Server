@@ -10,7 +10,8 @@ import java.io.IOException;
 public class Save {
     public Save(){}
 
-    public void execute(String path) throws IOException {
+    public void execute() throws IOException {
+        String path = Execute.path;
         CollectionManager collectionManager = new CollectionManager();
         try {
             FileOutputStream out = new FileOutputStream(path);

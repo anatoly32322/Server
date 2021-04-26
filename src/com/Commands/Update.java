@@ -3,13 +3,14 @@ package com.Commands;
 import com.CollectionManager;
 import com.Data.Route;
 
+import java.io.IOException;
 import java.lang.reflect.Field;
 
 
 public class Update {
     public Update() {}
 
-    public void execute(Integer id, Route a) throws NoSuchFieldException, IllegalAccessException {
+    public void execute(Integer id, Route a) throws NoSuchFieldException, IllegalAccessException, IOException {
         CollectionManager collectionManager = new CollectionManager();
         for (Route i : collectionManager.getData()) {
             if (i.getId() == id) {
@@ -23,5 +24,7 @@ public class Update {
                 break;
             }
         }
+        Save save = new Save();
+        save.execute();
     }
 }

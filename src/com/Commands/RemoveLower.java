@@ -3,12 +3,13 @@ package com.Commands;
 import com.CollectionManager;
 import com.Data.Route;
 
+import java.io.IOException;
 import java.util.ArrayDeque;
 
 public class RemoveLower {
     public RemoveLower(){}
 
-    public void execute(Route a){
+    public void execute(Route a) throws IOException {
         CollectionManager collectionManager = new CollectionManager();
         Double dist = a.getDistance();
         ArrayDeque<Route> deq = new ArrayDeque<Route>();
@@ -18,5 +19,7 @@ public class RemoveLower {
             }
         }
         collectionManager.setData(deq.clone());
+        Save save = new Save();
+        save.execute();
     }
 }
