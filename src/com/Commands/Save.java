@@ -27,7 +27,7 @@ public class Save {
             out.close();
             return;
         } catch (FileNotFoundException e){
-            System.out.println("Нету доступа к записи в файл.");
+            System.err.println("Нету доступа к записи в файл.");
 
         }
     }

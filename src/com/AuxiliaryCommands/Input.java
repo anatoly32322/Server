@@ -17,8 +17,8 @@ public class Input {
 
     public void execute(String PATH){
         try {
-            ReadCSV readCSV = new ReadCSV();
-            readCSV.execute();
+            ReadDB readDB = new ReadDB();
+            readDB.execute();
         } catch(IOException e){
             e.printStackTrace();
             System.exit(0);

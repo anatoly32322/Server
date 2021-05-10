@@ -11,10 +11,10 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 
-public class ReadCSV {
+public class ReadDB {
     CollectionManager collectionManager = new CollectionManager();
 
-    public ReadCSV(){}
+    public ReadDB(){}
 
     public void execute() throws IOException {
         String path = Execute.path;

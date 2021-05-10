@@ -1,30 +1,29 @@
 package com.Commands;
 
-import com.AuxiliaryCommands.GetRoute;
-import com.AuxiliaryCommands.GetRouteScript;
-import com.AuxiliaryCommands.ReadCSV;
 import com.CollectionManager;
+import com.CommandsManager;
 import com.Data.Request;
 import com.Data.Route;
 import com.Exceptions.ExitException;
 import com.Exceptions.IllegalCommandException;
 import com.Exceptions.WrongInputException;
+import com.Server.DataBase;
 
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
-import java.lang.ref.Cleaner;
 
 public class Execute {
     public static String path;
-    public Execute(BufferedReader bufferedReader, String path) throws IOException {
-        execute(bufferedReader, null);
+
+
+    public Execute(BufferedReader bufferedReader, String path, DataBase dbManager) throws IOException {
+        execute(bufferedReader, null, dbManager);
     }
 
-    public static Request execute(BufferedReader br, Route route) throws IOException {
+    public static Request execute(BufferedReader br, Route route, DataBase dbManager) throws IOException {
         String line = "";
-
+        CommandsManager commandsManager = new CommandsManager();
         Show show = new Show();
         String[] fields = new String[]{"name", "coordinates", "from", "to"};
 //        GetRouteScript getRouteScript = new GetRouteScript();
@@ -40,8 +39,7 @@ public class Execute {
                     switch (ln[0]) {
                         case "help":
                             if (ln.length == 1) {
-                                Help help = new Help();
-                                help.execute();
+                                commandsManager.help();
                             } else {
                                 throw new IllegalCommandException("Unknown help_<...> command");
                             }
@@ -49,9 +47,7 @@ public class Execute {
 
                         case "info":
                             if (ln.length == 1) {
-                                System.out.println(2);
-                                Info info = new Info();
-                                info.execute();
+                                commandsManager.info();
                             } else {
                                 throw new IllegalCommandException("Unknown info_<...> command");
                             }
@@ -59,17 +55,15 @@ public class Execute {
 
                         case "show":
                             if (ln.length == 1) {
-                                show.execute(true);
+                                commandsManager.show();
                             } else {
                                 throw new IllegalCommandException("Unknown show_<...> command");
                             }
                             break;
                         case "add":
-                            System.out.println(1);
                             if (ln.length == 1){
-                                collectionManager.addInCollection(route);
-                                Save save = new Save();
-                                save.execute();
+                                dbManager.addRouteIntoDB(route, dbManager.getUsername());
+                                commandsManager.add(route);
                             } else {
                                 throw new IllegalCommandException("Unknown show_<...> command");
                             }
@@ -77,23 +71,22 @@ public class Execute {
 
                         case "update":
                             if (ln.length == 2){
-                                Update update = new Update();
-                                update.execute(Integer.parseInt(ln[1]), route);
+                                dbManager.updateRouteByID(Integer.parseInt(ln[1]), route);
+                                commandsManager.updateByID(Integer.parseInt(ln[1]), route);
                             } else {
                                 throw new IllegalCommandException("Unknown show_<...> command");
                             }
                             break;
                         case "remove_by_id":
                             if (ln.length == 2){
-                                RemoveByID removeByID = new RemoveByID();
-                                removeByID.execute(Integer.parseInt(ln[1]));
+                                commandsManager.remove_by_id(Integer.parseInt(ln[1]));
                             } else {
                                 throw new IllegalCommandException("Unknown show_<...> command");
                             }
                             break;
                         case "clear":
                             if (ln.length == 1){
-                                collectionManager.clear();
+                                commandsManager.clear();
                             } else {
                                 throw new IllegalCommandException("Unknown show_<...> command");
                             }
@@ -102,48 +95,42 @@ public class Execute {
                             throw new ExitException();
                         case "add_if_max":
                             if (ln.length == 1){
-                                AddIfMax addIfMax = new AddIfMax();
-                                addIfMax.execute(route);
+                                commandsManager.add_if_max(route);
                             } else {
                                 throw new IllegalCommandException("Unknown show_<...> command");
                             }
                             break;
                         case "add_if_min":
                             if (ln.length == 1){
-                                AddIfMin addIfMin = new AddIfMin();
-                                addIfMin.execute(route);
+                                commandsManager.add_if_min(route);
                             } else {
                                 throw new IllegalCommandException("Unknown show_<...> command");
                             }
                             break;
                         case "remove_lower":
                             if (ln.length == 1){
-                                RemoveLower removeLower = new RemoveLower();
-                                removeLower.execute(route);
+                                commandsManager.remove_lower(route);
                             } else {
                                 throw new IllegalCommandException("Unknown show_<...> command");
                             }
                             break;
                         case "min_by_id":
                             if (ln.length == 1){
-                                MinByID minByID = new MinByID();
-                                minByID.execute();
+                                commandsManager.min_by_id();
                             } else {
                                 throw new IllegalCommandException("Unknown show_<...> command");
                             }
                             break;
                         case "group_counting_by_distance":
                             if (ln.length == 1){
-                                GroupCountingByDistance groupCountingByDistance = new GroupCountingByDistance();
-                                groupCountingByDistance.execute();
+                                commandsManager.group_counting_by_distance();
                             } else {
                                 throw new IllegalCommandException("Unknown show_<...> command");
                             }
                             break;
                         case "count_by_distance":
                             if (ln.length == 2){
-                                CountByDistance countByDistance = new CountByDistance();
-                                countByDistance.execute(Long.parseLong(ln[1]));
+                                commandsManager.count_by_distance(Long.parseLong(ln[1]));
                             } else {
                                 throw new IllegalCommandException("Unknown show_<...> command");
                             }

@@ -2,6 +2,7 @@ package com;
 
 import com.Commands.ShowRoute;
 import com.Data.Route;
+import com.Server.DataBase;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -48,6 +49,15 @@ public class CollectionManager {
 
     public void clear(){
         data.clear();
+    }
+
+    public void remove(int id){
+        for (Route i : data) {
+            if (i.getId() == id) {
+                data.removeFirstOccurrence(i);
+                break;
+            }
+        }
     }
 
     @Override

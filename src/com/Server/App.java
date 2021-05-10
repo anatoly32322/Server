@@ -1,7 +1,6 @@
 package com.Server;
 
-import com.AuxiliaryCommands.ReadCSV;
-import com.CollectionManager;
+import com.AuxiliaryCommands.ReadDB;
 import com.Commands.Execute;
 
 import java.io.BufferedReader;
@@ -9,11 +8,16 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 
 public class App {
-    public static void main(String[] args) throws IOException {
-
+    public static void main(String[] args) throws IOException, ClassNotFoundException {
+        try {
+            Class.forName("org.postgresql.Driver");
+        } catch (ClassNotFoundException e){
+            System.err.println("Необходимо скачать и установить драйвер PostgreSQL(https://jdbc.postgresql.org/download.html)");
+            System.exit(-1);
+        }
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         System.out.println("Server is running");
-        String str = br.readLine();
+/*        String str = br.readLine();
         String path;
         if (str.equals("1")){
             path = "C:\\Users\\User\\IdeaProjects\\Server\\src\\Saves\\input.csv";
@@ -22,10 +26,10 @@ public class App {
             String env = "INPUT";
             path = System.getenv(env);
         }
-        Execute.path = path;
-        ReadCSV readCSV = new ReadCSV();
-        readCSV.execute();
-        Server server = new Server(5457, br, path);
+        Execute.path = path;*/
+//        ReadDB readDB = new ReadDB();
+//        readDB.execute();
+        Server server = new Server(5458, br);
         server.run();
     }
 }

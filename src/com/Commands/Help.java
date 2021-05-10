@@ -1,6 +1,6 @@
 package com.Commands;
 
-import com.Data.WorkWithRequest.ExecuteRequest;
+import com.Data.ExecuteRequest;
 
 import java.util.HashMap;
 import java.util.Map;

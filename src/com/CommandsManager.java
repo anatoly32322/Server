@@ -22,14 +22,13 @@ public class CommandsManager {
      */
     private String path;
 
-    public CommandsManager(String path) {
-        this.path = path;
+    public CommandsManager() {
     }
 
     /**
      * Этот метод возвращает справку обо всех методах данного класса
      */
-    private void help() {
+    public void help() {
         Help hl = new Help();
         hl.execute();
     }
@@ -38,7 +37,7 @@ public class CommandsManager {
      * Этот метод возвращает информацию о коллекции: название, время создания и т.д.
      * @throws IllegalAccessException
      */
-    private void info() throws IllegalAccessException {
+    public void info() throws IllegalAccessException {
         Info info = new Info();
         info.execute();
     }
@@ -48,7 +47,7 @@ public class CommandsManager {
      * @return
      * @throws IllegalAccessException
      */
-    private String show() throws IllegalAccessException {
+    public String show() throws IllegalAccessException {
         Show show = new Show();
         return show.execute(true);
     }
@@ -60,7 +59,7 @@ public class CommandsManager {
      * @throws NoSuchFieldException
      * @throws IllegalAccessException
      */
-    private void updateByID(int id, Route a) throws NoSuchFieldException, IllegalAccessException, IOException {
+    public void updateByID(int id, Route a) throws NoSuchFieldException, IllegalAccessException, IOException {
         Update update = new Update();
         update.execute(id, a);
     }
@@ -69,7 +68,7 @@ public class CommandsManager {
      * Этот метод удаляет элемент из коллекции по его id
      * @param id Передаваемый id
      */
-    private void remove_by_id(int id) throws IOException {
+    public void remove_by_id(int id) throws IOException {
         RemoveByID removeByID = new RemoveByID();
         removeByID.execute(id);
     }
@@ -78,17 +77,21 @@ public class CommandsManager {
      * Этот метод сохраняет все элементы коллекции в файл
      * @throws IOException
      */
-    private void save() throws IOException {
+    public void save() throws IOException {
         Save save = new Save();
         save.execute();
     }
 
-
+    public void add(Route route) throws IOException {
+        collectionManager.addInCollection(route);
+        Save save = new Save();
+        save.execute();
+    }
 
     /**
      * Этот метод завершает программу
      */
-    private void exit() {
+    public void exit() {
         System.exit(0);
     }
 
@@ -96,7 +99,7 @@ public class CommandsManager {
      * Этот метод добавляет элемент в коллекцию, если его значение поля distance превышает наибольшее значение элемента коллекции
      * @param a Передаваемый объект класса Route
      */
-    private void add_if_max(Route a) throws IOException {
+    public void add_if_max(Route a) throws IOException {
         AddIfMax addIfMax = new AddIfMax();
         addIfMax.execute(a);
     }
@@ -108,7 +111,7 @@ public class CommandsManager {
      * Этот метод добавляет элемент в коллекцию, если его значение поля distance меньше, чем наименьшее значение элемента коллекции
      * @param a Передаваемый объект класса Route
      */
-    private void add_if_min(Route a) throws IOException {
+    public void add_if_min(Route a) throws IOException {
         AddIfMin addIfMin = new AddIfMin();
         addIfMin.execute(a);
     }
@@ -117,7 +120,7 @@ public class CommandsManager {
      * Этот метод удаляет элементы из коллекции, меньшие, чем заданный
      * @param a Передаваемый объект класса Route
      */
-    private void remove_lower(Route a) throws IOException {
+    public void remove_lower(Route a) throws IOException {
         RemoveLower removeLower = new RemoveLower();
         removeLower.execute(a);
     }
@@ -126,7 +129,7 @@ public class CommandsManager {
      * Этот метод выводит значение элемента коллекции с нименьшим значением поля id
      * @throws IllegalAccessException
      */
-    private void min_by_id() throws IllegalAccessException {
+    public void min_by_id() throws IllegalAccessException {
         MinByID minByID = new MinByID();
         minByID.execute();
     }
@@ -134,7 +137,7 @@ public class CommandsManager {
     /**
      * Этот метод группирует элементы коллекции по значению поля distance
      */
-    private void group_counting_by_distance() {
+    public void group_counting_by_distance() {
         GroupCountingByDistance groupCountingByDistance = new GroupCountingByDistance();
         groupCountingByDistance.execute();
     }
@@ -143,7 +146,7 @@ public class CommandsManager {
      * Этот метод выводит количество элементов, значение поля distance которых равно заданному
      * @param dist Передаваемое значение поля distance
      */
-    private void count_by_distance(long dist) {
+    public void count_by_distance(long dist) {
         CountByDistance countByDistance = new CountByDistance();
         countByDistance.execute(dist);
     }
@@ -179,8 +182,8 @@ public class CommandsManager {
      * Обрабатывает файл формата CSV
      */
     private void readCSVFile(String path) throws IOException {
-        ReadCSV readCSV = new ReadCSV();
-        readCSV.execute();
+        ReadDB readDB = new ReadDB();
+        readDB.execute();
     }
 
     public void input(String path)  {

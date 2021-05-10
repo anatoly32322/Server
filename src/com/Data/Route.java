@@ -25,6 +25,15 @@ public class Route extends Object implements Cloneable, Comparable, Serializable
         this.id = count_id;
     }
 
+    public Route(Integer id, String name, Coordinates coordinates, Location from, Location to, Double distance){
+        this.id = id;
+        this.name = name;
+        this.coordinates = coordinates;
+        this.from = from;
+        this.to = to;
+        this.distance = distance;
+    }
+
     public Route(){
         count_id++;
         id = count_id;

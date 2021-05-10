@@ -1,4 +1,4 @@
-package com.Data.WorkWithRequest;
+package com.Data;
 
 import com.Commands.Execute;
 import com.Data.Report;
@@ -6,6 +6,7 @@ import com.Data.ReportState;
 import com.Data.Request;
 import com.Data.Route;
 import com.Exceptions.ExitException;
+import com.Server.DataBase;
 
 import java.io.BufferedReader;
 import java.io.StringReader;
@@ -15,7 +16,7 @@ public abstract class ExecuteRequest {
     private static BufferedReader brOfCommands;
     public static StringBuilder answer = new StringBuilder();
 
-    public static Report doingRequest(Request request) {
+    public static Report doingRequest(Request request, DataBase dbManager) {
         System.out.println("Entering the command: " + request.getCommandName());
 
         StringBuilder fullRequest = new StringBuilder(request.getCommandName() + " " + request.getArgument());
@@ -24,7 +25,7 @@ public abstract class ExecuteRequest {
         ReportState stateAnswer = ReportState.OK;
         answer = new StringBuilder();
         try {
-            Execute.execute(brOfCommands, request.getObjectArgument() == "null" ? null : (Route)request.getObjectArgument());
+            Execute.execute(brOfCommands, request.getObjectArgument() == "null" ? null : (Route)request.getObjectArgument(), dbManager);
             stateAnswer = ReportState.OK;
         } catch (ExitException e) {
             stateAnswer = ReportState.SERVER_DIE;

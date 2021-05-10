@@ -2,7 +2,7 @@ package com.Commands;
 
 import com.CollectionManager;
 import com.Data.Route;
-import com.Data.WorkWithRequest.ExecuteRequest;
+import com.Data.ExecuteRequest;
 
 public class GroupCountingByDistance {
     CollectionManager collectionManager = new CollectionManager();

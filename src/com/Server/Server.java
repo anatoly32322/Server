@@ -4,7 +4,7 @@ import com.CollectionManager;
 import com.Commands.Execute;
 import com.Data.Report;
 import com.Data.Request;
-import com.Data.WorkWithRequest.ExecuteRequest;
+import com.Data.ExecuteRequest;
 import com.Exceptions.ExitException;
 
 import java.io.*;
@@ -13,27 +13,25 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.util.Arrays;
-import java.util.Scanner;
 
 public class Server {
     private int PORT;
     private InetAddress address;
     private DatagramSocket socket;
-    private String path;
+    private DataBase dataBase;
 
     private BufferedReader br;
     private CollectionManager collectionManager;
 
-    public Server(int port, BufferedReader br, String path) {
+    public Server(int port, BufferedReader br) {
         PORT = port;
         this.br = br;
-        this.path = path;
     }
 
     public void run() {
         try {
-            socket = new DatagramSocket(5457);
-
+            socket = new DatagramSocket(5458);
+            connectToDatabase(br);
             Runnable userInput = () -> {
                 try {
                     while (true) {
@@ -41,10 +39,10 @@ public class Server {
                         System.out.println(Arrays.toString(userCommand));
                         if (userCommand[0].equals("save") || userCommand[0].equals("exit")) {
                             if (userCommand[0].equals("save") || userCommand.length == 2) {
-                                Execute.execute(new BufferedReader(new StringReader("save\n" + userCommand[1] + "\nexit")), null);
+                                Execute.execute(new BufferedReader(new StringReader("save\n" + userCommand[1] + "\nexit")), null, dataBase);
                             }
                             if (userCommand[0].equals("exit")) {
-                                Execute.execute(new BufferedReader(new StringReader("exit")), null);
+                                Execute.execute(new BufferedReader(new StringReader("exit")), null, dataBase);
                             }
                         } else {
                             System.out.println("Server has command save and command exit as well!");
@@ -63,8 +61,18 @@ public class Server {
 
         } catch (SocketException e) {
             e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
+    }
+
+    public void connectToDatabase(BufferedReader br) throws IOException {
+        String name = br.readLine().trim();
+        String password = br.readLine().trim();
+        String jdbcURL = "jdbc:postgresql://localhost:7654/studs";
+        dataBase = new DataBase(jdbcURL, name, password);
+        dataBase.connectToDatabase();
     }
 
     public void clientRequest() throws ExitException {
@@ -81,7 +89,7 @@ public class Server {
             PORT = getPacket.getPort();
 
             request = deserialize(getPacket);
-            report = ExecuteRequest.doingRequest(request);
+            report = ExecuteRequest.doingRequest(request, dataBase);
 
 
         } catch (ExitException e) {
