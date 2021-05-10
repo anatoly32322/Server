@@ -1,5 +1,7 @@
 package com.Commands;
 
+import com.AuxiliaryCommands.IsMax;
+import com.AuxiliaryCommands.IsMin;
 import com.CollectionManager;
 import com.CommandsManager;
 import com.Data.Request;
@@ -12,6 +14,7 @@ import com.Server.DataBase;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.sql.SQLException;
 
 public class Execute {
     public static String path;
@@ -37,6 +40,14 @@ public class Execute {
                     String[] ln = line.split(" ");
                     System.out.println(ln[0] + ' ' + ln.length);
                     switch (ln[0]) {
+                        case "authorization":
+                            if (ln.length == 3){
+                                System.out.println(ln[1] + " " + ln[2]);
+                                dbManager.registerUser(ln[1], ln[2]);
+                            } else {
+                                throw new IllegalCommandException("Unknown show_<...> command");
+                            }
+                            break;
                         case "help":
                             if (ln.length == 1) {
                                 commandsManager.help();
@@ -62,8 +73,9 @@ public class Execute {
                             break;
                         case "add":
                             if (ln.length == 1){
-                                dbManager.addRouteIntoDB(route, dbManager.getUsername());
-                                commandsManager.add(route);
+                                if (dbManager.addRouteIntoDB(route)) {
+                                    commandsManager.add(route);
+                                }
                             } else {
                                 throw new IllegalCommandException("Unknown show_<...> command");
                             }
@@ -71,22 +83,27 @@ public class Execute {
 
                         case "update":
                             if (ln.length == 2){
-                                dbManager.updateRouteByID(Integer.parseInt(ln[1]), route);
-                                commandsManager.updateByID(Integer.parseInt(ln[1]), route);
+                                if (dbManager.updateRouteByID(Integer.parseInt(ln[1]), route)) {
+                                    commandsManager.updateByID(Integer.parseInt(ln[1]), route);
+                                }
                             } else {
                                 throw new IllegalCommandException("Unknown show_<...> command");
                             }
                             break;
                         case "remove_by_id":
                             if (ln.length == 2){
-                                commandsManager.remove_by_id(Integer.parseInt(ln[1]));
+                                if (dbManager.removeRouteByID(Integer.parseInt(ln[1]), dbManager.getUsername())) {
+                                    commandsManager.remove_by_id(Integer.parseInt(ln[1]));
+                                }
                             } else {
                                 throw new IllegalCommandException("Unknown show_<...> command");
                             }
                             break;
                         case "clear":
                             if (ln.length == 1){
-                                commandsManager.clear();
+                                if (dbManager.removeAll()) {
+                                    commandsManager.clear();
+                                }
                             } else {
                                 throw new IllegalCommandException("Unknown show_<...> command");
                             }
@@ -95,21 +112,31 @@ public class Execute {
                             throw new ExitException();
                         case "add_if_max":
                             if (ln.length == 1){
-                                commandsManager.add_if_max(route);
+                                if (IsMax.execute(route)) {
+                                    if (dbManager.removeRouteByID(route.getId(), dbManager.getUsername())) {
+                                        commandsManager.add_if_max(route);
+                                    }
+                                }
                             } else {
                                 throw new IllegalCommandException("Unknown show_<...> command");
                             }
                             break;
                         case "add_if_min":
                             if (ln.length == 1){
-                                commandsManager.add_if_min(route);
+                                if (IsMin.execute(route)){
+                                    if (dbManager.removeRouteByID(route.getId(), dbManager.getUsername())){
+                                        commandsManager.add_if_min(route);
+                                    }
+                                }
                             } else {
                                 throw new IllegalCommandException("Unknown show_<...> command");
                             }
                             break;
                         case "remove_lower":
                             if (ln.length == 1){
-                                commandsManager.remove_lower(route);
+                                if (dbManager.removeLower(route)) {
+                                    commandsManager.remove_lower(route);
+                                }
                             } else {
                                 throw new IllegalCommandException("Unknown show_<...> command");
                             }

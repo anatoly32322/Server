@@ -32,6 +32,7 @@ public class Server {
         try {
             socket = new DatagramSocket(5458);
             connectToDatabase(br);
+            dataBase.extractCollectionFromDB();
             Runnable userInput = () -> {
                 try {
                     while (true) {
@@ -68,7 +69,9 @@ public class Server {
     }
 
     public void connectToDatabase(BufferedReader br) throws IOException {
+        System.out.println("Введите логин");
         String name = br.readLine().trim();
+        System.out.println("Введите пароль");
         String password = br.readLine().trim();
         String jdbcURL = "jdbc:postgresql://localhost:7654/studs";
         dataBase = new DataBase(jdbcURL, name, password);
