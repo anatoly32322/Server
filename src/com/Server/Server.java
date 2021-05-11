@@ -13,6 +13,9 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.util.Arrays;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class Server {
     private int PORT;
@@ -55,9 +58,58 @@ public class Server {
             };
             Thread thread = new Thread(userInput);
             thread.start();
+            Runnable clientRequest = () ->{
+                Request request = null;
+                Report report = null;
 
+                try {
+                    byte[] accept = new byte[16384];
+                    DatagramPacket getPacket = new DatagramPacket(accept, accept.length);
+
+                    socket.receive(getPacket);
+
+                    address = getPacket.getAddress();
+                    PORT = getPacket.getPort();
+
+                    request = deserialize(getPacket);
+                    report = ExecuteRequest.doingRequest(request, dataBase);
+
+
+                } catch (ExitException e) {
+                    throw e;
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (ClassNotFoundException e) {
+                    e.printStackTrace();
+                } finally {
+                    byte[] sendBuffer = new byte[0];
+                    try {
+                        sendBuffer = serialize(report);
+                        DatagramPacket sendPacket = new DatagramPacket(sendBuffer, sendBuffer.length, address, PORT);
+                        Runnable sendReport = () -> {
+                            try {
+                                socket.send(sendPacket);
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                        };
+
+                        ExecutorService executor = Executors.newFixedThreadPool(2);
+                        executor.submit(sendReport);
+                        executor.shutdown();
+                        //System.out.println("XXX " + report.getReportBody());
+                        //System.out.println("Sending to " + sendPacket.getAddress() + ", message: " +
+                        //        (report == null ? "ERROR" : report.getReportBody()));
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                }
+            };
+
+            ExecutorService executor = Executors.newCachedThreadPool();
             while (true) {
-                clientRequest();
+                executor.submit(clientRequest);
             }
 
         } catch (SocketException e) {
@@ -78,43 +130,44 @@ public class Server {
         dataBase.connectToDatabase();
     }
 
-    public void clientRequest() throws ExitException {
-        Request request = null;
-        Report report = null;
-
-        try {
-            byte[] accept = new byte[16384];
-            DatagramPacket getPacket = new DatagramPacket(accept, accept.length);
-
-            socket.receive(getPacket);
-
-            address = getPacket.getAddress();
-            PORT = getPacket.getPort();
-
-            request = deserialize(getPacket);
-            report = ExecuteRequest.doingRequest(request, dataBase);
-
-
-        } catch (ExitException e) {
-            throw e;
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        } finally {
-            byte[] sendBuffer = new byte[0];
-            try {
-                sendBuffer = serialize(report);
-                DatagramPacket sendPacket = new DatagramPacket(sendBuffer, sendBuffer.length, address, PORT);
-                socket.send(sendPacket);
-                System.out.println("Sending to " + sendPacket.getAddress() + ", message: " +
-                        (report == null ? "ERROR" : report.getReportBody()));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-        }
-    }
+//    public void clientRequest() throws ExitException {
+//        Request request = null;
+//        Report report = null;
+//
+//        try {
+//            byte[] accept = new byte[16384];
+//            DatagramPacket getPacket = new DatagramPacket(accept, accept.length);
+//
+//            socket.receive(getPacket);
+//
+//            address = getPacket.getAddress();
+//            PORT = getPacket.getPort();
+//
+//            request = deserialize(getPacket);
+//            report = ExecuteRequest.doingRequest(request, dataBase);
+//
+//
+//        } catch (ExitException e) {
+//            throw e;
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        } catch (ClassNotFoundException e) {
+//            e.printStackTrace();
+//        } finally {
+//            byte[] sendBuffer = new byte[0];
+//            try {
+//                sendBuffer = serialize(report);
+//                DatagramPacket sendPacket = new DatagramPacket(sendBuffer, sendBuffer.length, address, PORT);
+//                socket.send(sendPacket);
+//                //System.out.println("XXX " + report.getReportBody());
+//                //System.out.println("Sending to " + sendPacket.getAddress() + ", message: " +
+//                //        (report == null ? "ERROR" : report.getReportBody()));
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//
+//        }
+//    }
 
     private <T> T deserialize(DatagramPacket getPacket) throws IOException, ClassNotFoundException {
         ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(getPacket.getData());

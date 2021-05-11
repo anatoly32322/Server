@@ -7,11 +7,12 @@ public class Info {
     private CollectionManager collectionManager = new CollectionManager();
     public Info() {}
 
-    public void execute(){
+    public String execute(){
         Class cl = collectionManager.getData().getClass();
         String report = "Название контейнера: " + cl.getName() + '\n' + "Время создания: " + collectionManager.getDate() + '\n' + "Данные хранимые в контейнере:\n" + collectionManager.toString() + '\n';
         System.out.println(report);
         ExecuteRequest.answer.append(report);
+        return report;
 //        System.out.println("Название контейнера: " + cl.getName());
 //        System.out.println("Время создания: " + collectionManager.getDate());
 //        System.out.println("Данные хранимые в контейнере:\n" + collectionManager.toString());

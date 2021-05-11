@@ -4,8 +4,7 @@ import com.AuxiliaryCommands.IsMax;
 import com.AuxiliaryCommands.IsMin;
 import com.CollectionManager;
 import com.CommandsManager;
-import com.Data.Request;
-import com.Data.Route;
+import com.Data.*;
 import com.Exceptions.ExitException;
 import com.Exceptions.IllegalCommandException;
 import com.Exceptions.WrongInputException;
@@ -24,7 +23,7 @@ public class Execute {
         execute(bufferedReader, null, dbManager);
     }
 
-    public static Request execute(BufferedReader br, Route route, DataBase dbManager) throws IOException {
+    public static ReportState execute(BufferedReader br, Route route, DataBase dbManager) throws IOException {
         String line = "";
         CommandsManager commandsManager = new CommandsManager();
         Show show = new Show();
@@ -43,7 +42,12 @@ public class Execute {
                         case "authorization":
                             if (ln.length == 3){
                                 System.out.println(ln[1] + " " + ln[2]);
-                                dbManager.registerUser(ln[1], ln[2]);
+                                if (!dbManager.registerUser(ln[1], ln[2])){
+                                    ExecuteRequest.reportState = ReportState.ERROR;
+                                }
+                                else{
+                                    ExecuteRequest.reportState = ReportState.OK;
+                                }
                             } else {
                                 throw new IllegalCommandException("Unknown show_<...> command");
                             }
@@ -51,6 +55,7 @@ public class Execute {
                         case "help":
                             if (ln.length == 1) {
                                 commandsManager.help();
+                                ExecuteRequest.reportState = ReportState.OK;
                             } else {
                                 throw new IllegalCommandException("Unknown help_<...> command");
                             }
@@ -59,6 +64,7 @@ public class Execute {
                         case "info":
                             if (ln.length == 1) {
                                 commandsManager.info();
+                                ExecuteRequest.reportState = ReportState.OK;
                             } else {
                                 throw new IllegalCommandException("Unknown info_<...> command");
                             }
@@ -67,6 +73,7 @@ public class Execute {
                         case "show":
                             if (ln.length == 1) {
                                 commandsManager.show();
+                                ExecuteRequest.reportState = ReportState.OK;
                             } else {
                                 throw new IllegalCommandException("Unknown show_<...> command");
                             }
@@ -75,6 +82,7 @@ public class Execute {
                             if (ln.length == 1){
                                 if (dbManager.addRouteIntoDB(route)) {
                                     commandsManager.add(route);
+                                    ExecuteRequest.reportState = ReportState.OK;
                                 }
                             } else {
                                 throw new IllegalCommandException("Unknown show_<...> command");
@@ -85,6 +93,7 @@ public class Execute {
                             if (ln.length == 2){
                                 if (dbManager.updateRouteByID(Integer.parseInt(ln[1]), route)) {
                                     commandsManager.updateByID(Integer.parseInt(ln[1]), route);
+                                    ExecuteRequest.reportState = ReportState.OK;
                                 }
                             } else {
                                 throw new IllegalCommandException("Unknown show_<...> command");
@@ -94,6 +103,7 @@ public class Execute {
                             if (ln.length == 2){
                                 if (dbManager.removeRouteByID(Integer.parseInt(ln[1]), dbManager.getUsername())) {
                                     commandsManager.remove_by_id(Integer.parseInt(ln[1]));
+                                    ExecuteRequest.reportState = ReportState.OK;
                                 }
                             } else {
                                 throw new IllegalCommandException("Unknown show_<...> command");
@@ -103,6 +113,7 @@ public class Execute {
                             if (ln.length == 1){
                                 if (dbManager.removeAll()) {
                                     commandsManager.clear();
+                                    ExecuteRequest.reportState = ReportState.OK;
                                 }
                             } else {
                                 throw new IllegalCommandException("Unknown show_<...> command");
@@ -115,6 +126,7 @@ public class Execute {
                                 if (IsMax.execute(route)) {
                                     if (dbManager.removeRouteByID(route.getId(), dbManager.getUsername())) {
                                         commandsManager.add_if_max(route);
+                                        ExecuteRequest.reportState = ReportState.OK;
                                     }
                                 }
                             } else {
@@ -126,6 +138,7 @@ public class Execute {
                                 if (IsMin.execute(route)){
                                     if (dbManager.removeRouteByID(route.getId(), dbManager.getUsername())){
                                         commandsManager.add_if_min(route);
+                                        ExecuteRequest.reportState = ReportState.OK;
                                     }
                                 }
                             } else {
@@ -136,6 +149,7 @@ public class Execute {
                             if (ln.length == 1){
                                 if (dbManager.removeLower(route)) {
                                     commandsManager.remove_lower(route);
+                                    ExecuteRequest.reportState = ReportState.OK;
                                 }
                             } else {
                                 throw new IllegalCommandException("Unknown show_<...> command");
@@ -144,6 +158,7 @@ public class Execute {
                         case "min_by_id":
                             if (ln.length == 1){
                                 commandsManager.min_by_id();
+                                ExecuteRequest.reportState = ReportState.OK;
                             } else {
                                 throw new IllegalCommandException("Unknown show_<...> command");
                             }
@@ -151,6 +166,7 @@ public class Execute {
                         case "group_counting_by_distance":
                             if (ln.length == 1){
                                 commandsManager.group_counting_by_distance();
+                                ExecuteRequest.reportState = ReportState.OK;
                             } else {
                                 throw new IllegalCommandException("Unknown show_<...> command");
                             }
@@ -158,6 +174,7 @@ public class Execute {
                         case "count_by_distance":
                             if (ln.length == 2){
                                 commandsManager.count_by_distance(Long.parseLong(ln[1]));
+                                ExecuteRequest.reportState = ReportState.OK;
                             } else {
                                 throw new IllegalCommandException("Unknown show_<...> command");
                             }
@@ -183,6 +200,6 @@ public class Execute {
                 e.printStackTrace();
             }
         }
-        return new Request("exit", "");
+        return ReportState.OK;
     }
 }

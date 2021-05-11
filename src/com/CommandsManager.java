@@ -28,18 +28,18 @@ public class CommandsManager {
     /**
      * Этот метод возвращает справку обо всех методах данного класса
      */
-    public void help() {
+    public String help() {
         Help hl = new Help();
-        hl.execute();
+        return hl.execute();
     }
 
     /**
      * Этот метод возвращает информацию о коллекции: название, время создания и т.д.
      * @throws IllegalAccessException
      */
-    public void info() throws IllegalAccessException {
+    public String info() throws IllegalAccessException {
         Info info = new Info();
-        info.execute();
+        return info.execute();
     }
 
     /**
@@ -84,8 +84,6 @@ public class CommandsManager {
 
     public void add(Route route) throws IOException {
         collectionManager.addInCollection(route);
-        Save save = new Save();
-        save.execute();
     }
 
     /**

@@ -30,7 +30,7 @@ public class Help {
 
     public Help() {}
 
-    public void execute() {
+    public String execute() {
         String report = "";
         for (Map.Entry<String, String> pair : manual.entrySet()) {
             String key = pair.getKey();
@@ -39,5 +39,6 @@ public class Help {
             //System.out.println(key + " " + value);
         }
         ExecuteRequest.answer.append(report);
+        return report;
     }
 }

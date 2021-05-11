@@ -12,11 +12,13 @@ import java.io.BufferedReader;
 import java.io.StringReader;
 import java.lang.management.BufferPoolMXBean;
 
-public abstract class ExecuteRequest {
+public abstract class ExecuteRequest implements Runnable {
     private static BufferedReader brOfCommands;
     public static StringBuilder answer = new StringBuilder();
+    public static ReportState reportState = ReportState.OK;
 
-    public static Report doingRequest(Request request, DataBase dbManager) {
+
+    public static Report doingRequest(Request request, DataBase dbManager)  {
         System.out.println("Entering the command: " + request.getCommandName());
 
         StringBuilder fullRequest = new StringBuilder(request.getCommandName() + " " + request.getArgument());
@@ -36,12 +38,11 @@ public abstract class ExecuteRequest {
             answer.append(e.getMessage());
         }
 
-
         return makeReport(stateAnswer, answer);
     }
 
     public static Report makeReport(ReportState state, StringBuilder body) {
-        Report reportToClient = new Report(state, body.toString());
+        Report reportToClient = new Report(state, body.toString(), reportState);
 
         return reportToClient;
     }

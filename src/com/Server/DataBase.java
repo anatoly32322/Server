@@ -2,6 +2,7 @@ package com.Server;
 
 import com.CommandsManager;
 import com.Data.Coordinates;
+import com.Data.ExecuteRequest;
 import com.Data.Location;
 import com.Data.Route;
 import com.DataBaseUtility.DataHasher;
@@ -23,22 +24,22 @@ public class DataBase {
     private Connection connection;
     private static HashMap<String, Boolean> userExist = new HashMap<String, Boolean>();
     private static final String ADD_USER_REQUEST = "INSERT INTO USERS (username, password) VALUES (?, ?)";
-    private static final String GET_ALL_FROM_TABLE = "SELECT * FROM DATA";
-    private static final String ADD_ROUTE_REQUEST = "INSERT INTO DATA (id, name, x, y, z, from, to, distance, owner) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-    private static final String REMOVE_ROUTE_BY_ID = "DELETE FROM DATA WHERE id = ?";
-    private static final String CHECK_ID_EXISTENCE = "SELECT COUNT(*) FROM DATA WHERE id = ?";
-    private static final String IS_OWNER_REQUEST = "SELECT COUNT(*) FROM DATA WHERE id = ? AND owner = ?";
+    private static final String GET_ALL_FROM_TABLE = "SELECT * FROM COLLECTION";
+    private static final String ADD_ROUTE_REQUEST = "INSERT INTO COLLECTION (id, name_, x_coord, y_coord, z_coord, from_, to_, distance, owner_) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    private static final String REMOVE_ROUTE_BY_ID = "DELETE FROM COLLECTION WHERE id = ?";
+    private static final String CHECK_ID_EXISTENCE = "SELECT COUNT(*) FROM COLLECTION WHERE id = ?";
+    private static final String IS_OWNER_REQUEST = "SELECT COUNT(*) FROM COLLECTION WHERE id = ? AND owner_ = ?";
     private static final String VALIDATE_USER_REQUEST = "SELECT COUNT(*) FROM USERS WHERE username = ? AND password = ?";
     private static final String UPDATE_ROUTE_BY_ID = "";
-    private static final String UPDATE_NAME_BY_ID = "UPDATE DATA SET name = ? WHERE id = ?";
-    private static final String UPDATE_X_BY_ID = "UPDATE DATA SET x = ? WHERE id = ?";
-    private static final String UPDATE_Y_BY_ID = "UPDATE DATA SET y = ? WHERE id = ?";
-    private static final String UPDATE_Z_BY_ID = "UPDATE DATA SET z = ? WHERE id = ?";
-    private static final String UPDATE_FROM_BY_ID = "UPDATE DATA SET from = ? WHERE id = ?";
-    private static final String UPDATE_TO_BY_ID = "UPDATE DATA SET to = ? WHERE id = ?";
-    private static final String UPDATE_DISTANCE_BY_ID = "UPDATE DATA SET distance = ? WHERE id = ?";
-    private static final String REMOVE_ALL = "DELETE FROM DATA WHERE owner = ?";
-    private static final String REMOVE_LOWER = "DELETE FROM DATA WHERE distance < ?";
+    private static final String UPDATE_NAME_BY_ID = "UPDATE COLLECTION SET name_ = ? WHERE id = ?";
+    private static final String UPDATE_X_BY_ID = "UPDATE COLLECTION SET x_coord = ? WHERE id = ?";
+    private static final String UPDATE_Y_BY_ID = "UPDATE COLLECTION SET y_coord = ? WHERE id = ?";
+    private static final String UPDATE_Z_BY_ID = "UPDATE COLLECTION SET z_coord = ? WHERE id = ?";
+    private static final String UPDATE_FROM_BY_ID = "UPDATE COLLECTION SET from_ = ? WHERE id = ?";
+    private static final String UPDATE_TO_BY_ID = "UPDATE COLLECTION SET to_ = ? WHERE id = ?";
+    private static final String UPDATE_DISTANCE_BY_ID = "UPDATE COLLECTION SET distance = ? WHERE id = ?";
+    private static final String REMOVE_ALL = "DELETE FROM COLLECTION WHERE owner_ = ?";
+    private static final String REMOVE_LOWER = "DELETE FROM COLLECTION WHERE distance < ?";
     private static final String CHECK_USER_REQUEST = "SELECT COUNT(*) FROM USERS WHERE username = ? AND password = ?";
     private static final String CHECK_USER_EXIST = "SELECT COUNT(*) FROM USERS WHERE username = ?";
 
@@ -75,7 +76,6 @@ public class DataBase {
         checkUser.setString(2, password);
         ResultSet result = checkUser.executeQuery();
         result.next();
-        checkUser.close();
         if (result.getInt(1) >= 1){
             return true;
         }
@@ -87,26 +87,27 @@ public class DataBase {
         checkUserExist.setString(1, username);
         ResultSet result = checkUserExist.executeQuery();
         result.next();
-        checkUserExist.close();
         if (result.getInt(1) >= 1){
             return true;
         }
         return false;
     }
 
-    public boolean registerUser(String username, String password) {
+    public Boolean registerUser(String username, String password) {
         try {
-            System.out.println("XXX " + userExist.get(username));
+            password = DataHasher.get_SHA512_password(password + pepper);
+            System.out.println("XXX " + username);
+            this.owner = username;
             if (checkUserExist(username)) {
                 System.out.println("KKK");
                 if (checkUser(username, password)) {
                     System.out.println("YYY " + owner);
-                    owner = username;
+                    ExecuteRequest.answer.append("Авторизация произошла успешно!");
                     return true;
                 }
+                ExecuteRequest.answer.append("Введены некорректные данные. Повторите ввод.");
                 return false;
             }
-            owner = username;
             System.out.println("ZZZ " + owner);
             PreparedStatement addStatement = connection.prepareStatement(ADD_USER_REQUEST);
             userExist.put(username, true);
@@ -114,8 +115,8 @@ public class DataBase {
             addStatement.setString(2, DataHasher.get_SHA512_password(password + pepper));
             addStatement.executeUpdate();
             addStatement.close();
-            owner = username;
             System.out.println("Вы успешно авторизовались!");
+            ExecuteRequest.answer.append("Авторизация произошла успешно!");
         } catch(SQLException e){
             System.err.println("Неверный запрос. Завершаю работу.");
             System.exit(-1);
@@ -137,7 +138,6 @@ public class DataBase {
                     System.exit(-1);
                 }
             }
-            getStatement.close();
             System.out.println("Данные успешно загружены в коллекцию!");
         } catch (SQLException throwables) {
             System.err.println("Произошла ошибка при загрузке данных из базы данных. Завершение работы.");
@@ -149,15 +149,25 @@ public class DataBase {
 
     public Route extractRoute(ResultSet result) throws SQLException {
         Integer id = result.getInt("id");
-        String name = result.getString("name");
-        Long x_coord = result.getLong("x");
-        Double y_coord = result.getDouble("y");
-        Double z_coord = result.getDouble("z");
-        Location from = Location.valueOf(result.getString("from"));
-        Location to = Location.valueOf(result.getString("to"));
+        String name = result.getString("name_");
+        Long x_coord = result.getLong("x_coord");
+        Double y_coord = result.getDouble("y_coord");
+        Double z_coord = result.getDouble("z_coord");
+        Location from = Location.valueOf(result.getString("from_").toUpperCase());
+        Location to = Location.valueOf(result.getString("to_").toUpperCase());
         Double dist = result.getDouble("distance");
+//        System.out.println(id);
+//        System.out.println(name);
+//        System.out.println(x_coord);
+//        System.out.println(y_coord);
+//        System.out.println(z_coord);
+//        System.out.println(from);
+//        System.out.println(to);
+//        System.out.println(dist);
         Coordinates coordinates = new Coordinates(x_coord, y_coord, z_coord);
+//        System.out.println(coordinates.toString());
         Route route = new Route(id, name, coordinates, from, to, dist);
+//        System.out.println(route.toString());
         return route;
     }
 
@@ -172,7 +182,7 @@ public class DataBase {
         Long x_coord = coordinates.x;
         Double y_coord = coordinates.y;
         Double z_coord = coordinates.z;
-        System.out.println(owner);
+        System.out.println(this.owner);
         try {
             PreparedStatement addRouteRequest = connection.prepareStatement(ADD_ROUTE_REQUEST);
             addRouteRequest.setInt(1, id);
@@ -182,7 +192,8 @@ public class DataBase {
             addRouteRequest.setDouble(5, z_coord);
             addRouteRequest.setString(6, from.getName());
             addRouteRequest.setString(7, to.getName());
-            addRouteRequest.setString(8, owner);
+            addRouteRequest.setDouble(8, dist);
+            addRouteRequest.setString(9, this.owner);
             addRouteRequest.executeUpdate();
             addRouteRequest.close();
         } catch (SQLException throwables) {
@@ -227,7 +238,6 @@ public class DataBase {
         checkIDRequest.setInt(1, id);
         ResultSet result = checkIDRequest.executeQuery();
         result.next();
-        checkIDRequest.close();
         return result.getInt(1) >= 1;
     }
 
@@ -237,7 +247,6 @@ public class DataBase {
         isOwnerRequest.setString(2, owner);
         ResultSet result = isOwnerRequest.executeQuery();
         result.next();
-        isOwnerRequest.close();
         return result.getInt(1) >= 1;
     }
 
@@ -247,7 +256,6 @@ public class DataBase {
         validateUserRequest.setString(2, password);
         ResultSet result = validateUserRequest.executeQuery();
         result.next();
-        validateUserRequest.close();
         return result.getInt(1) >= 1;
     }
 

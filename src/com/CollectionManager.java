@@ -9,10 +9,13 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayDeque;
 import java.util.Arrays;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class CollectionManager {
     private static ArrayDeque<Route> data = new ArrayDeque<>();
     private ZonedDateTime date = ZonedDateTime.of(LocalDateTime.now(), ZoneId.of("Asia/Tokyo"));
+    private Lock lock = new ReentrantLock();
 
     public CollectionManager(){}
 
@@ -29,8 +32,13 @@ public class CollectionManager {
     }
 
     public void addInCollection(Route a){
-        data.addLast(a);
-        sort();
+        lock.lock();
+        try {
+            data.addLast(a);
+            sort();
+        } finally {
+            lock.unlock();
+        }
     }
 
     private void sort() {
@@ -48,15 +56,27 @@ public class CollectionManager {
     }
 
     public void clear(){
-        data.clear();
+        lock.lock();
+        try {
+            data.clear();
+        }
+        finally {
+            lock.unlock();
+        }
     }
 
     public void remove(int id){
-        for (Route i : data) {
-            if (i.getId() == id) {
-                data.removeFirstOccurrence(i);
-                break;
+        lock.lock();
+        try {
+            for (Route i : data) {
+                if (i.getId() == id) {
+                    data.removeFirstOccurrence(i);
+                    break;
+                }
             }
+        }
+        finally {
+            lock.unlock();
         }
     }
 
