@@ -12,10 +12,9 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 
 public class Server {
     private int PORT;
@@ -33,7 +32,7 @@ public class Server {
 
     public void run() {
         try {
-            socket = new DatagramSocket(5458);
+            socket = new DatagramSocket(8743);
             connectToDatabase(br);
             dataBase.extractCollectionFromDB();
             Runnable userInput = () -> {
@@ -41,12 +40,14 @@ public class Server {
                     while (true) {
                         String[] userCommand = (br.readLine()).split(" ");
                         System.out.println(Arrays.toString(userCommand));
-                        if (userCommand[0].equals("save") || userCommand[0].equals("exit")) {
+
+                            if (userCommand[0].equals("save") || userCommand[0].equals("exit")) {
                             if (userCommand[0].equals("save") || userCommand.length == 2) {
-                                Execute.execute(new BufferedReader(new StringReader("save\n" + userCommand[1] + "\nexit")), null, dataBase);
+                                Execute.execute(new BufferedReader(new StringReader("save\n" + userCommand[1] + "\nexit")), null, dataBase, null);
                             }
                             if (userCommand[0].equals("exit")) {
-                                Execute.execute(new BufferedReader(new StringReader("exit")), null, dataBase);
+                                System.out.println("Завершаю работу.");
+                                System.exit(-1);
                             }
                         } else {
                             System.out.println("Server has command save and command exit as well!");
@@ -58,66 +59,68 @@ public class Server {
             };
             Thread thread = new Thread(userInput);
             thread.start();
-            Runnable clientRequest = () ->{
-                Request request = null;
-                Report report = null;
 
-                try {
-                    byte[] accept = new byte[16384];
-                    DatagramPacket getPacket = new DatagramPacket(accept, accept.length);
-
-                    socket.receive(getPacket);
-
-                    address = getPacket.getAddress();
-                    PORT = getPacket.getPort();
-
-                    request = deserialize(getPacket);
-                    report = ExecuteRequest.doingRequest(request, dataBase);
-
-
-                } catch (ExitException e) {
-                    throw e;
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (ClassNotFoundException e) {
-                    e.printStackTrace();
-                } finally {
-                    byte[] sendBuffer = new byte[0];
-                    try {
-                        sendBuffer = serialize(report);
-                        DatagramPacket sendPacket = new DatagramPacket(sendBuffer, sendBuffer.length, address, PORT);
-                        Runnable sendReport = () -> {
-                            try {
-                                socket.send(sendPacket);
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                            }
-                        };
-
-                        ExecutorService executor = Executors.newFixedThreadPool(2);
-                        executor.submit(sendReport);
-                        executor.shutdown();
-                        //System.out.println("XXX " + report.getReportBody());
-                        //System.out.println("Sending to " + sendPacket.getAddress() + ", message: " +
-                        //        (report == null ? "ERROR" : report.getReportBody()));
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-
-                }
-            };
-
-            ExecutorService executor = Executors.newCachedThreadPool();
-            while (true) {
-                executor.submit(clientRequest);
+            while (true){
+                clientRequest();
             }
-
         } catch (SocketException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
 
+    public void clientRequest(){
+        Report report = null;
+        Request request = null;
+        try{
+            Callable<Request> readRequest = this::readRequest;
+            ExecutorService executor = Executors.newCachedThreadPool();
+            Future<Request> result = executor.submit(readRequest);
+            request = result.get();
+            report = ExecuteRequest.doingRequest(request, dataBase);
+
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        } finally {
+            byte[] sendBuffer = new byte[0];
+            try {
+                sendBuffer = serialize(report);
+                DatagramPacket sendPacket = new DatagramPacket(sendBuffer, sendBuffer.length, address, PORT);
+                Runnable sendReport = () -> {
+                    try {
+                        socket.send(sendPacket);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                };
+                ExecutorService executor = Executors.newFixedThreadPool(2);
+                executor.submit(sendReport);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private Request readRequest(){
+        byte[] accept = new byte[16384];
+        DatagramPacket getPacket = new DatagramPacket(accept, accept.length);
+        Request request = null;
+        try {
+            socket.receive(getPacket);
+            address = getPacket.getAddress();
+            PORT = getPacket.getPort();
+
+            request = deserialize(getPacket);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        return request;
     }
 
     public void connectToDatabase(BufferedReader br) throws IOException {
@@ -125,7 +128,7 @@ public class Server {
         String name = br.readLine().trim();
         System.out.println("Введите пароль");
         String password = br.readLine().trim();
-        String jdbcURL = "jdbc:postgresql://localhost:7654/studs";
+        String jdbcURL = "jdbc:postgresql://pg:5432/studs";
         dataBase = new DataBase(jdbcURL, name, password);
         dataBase.connectToDatabase();
     }

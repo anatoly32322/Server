@@ -19,11 +19,11 @@ public class Execute {
     public static String path;
 
 
-    public Execute(BufferedReader bufferedReader, String path, DataBase dbManager) throws IOException {
-        execute(bufferedReader, null, dbManager);
+    public Execute(BufferedReader bufferedReader, String path, DataBase dbManager, String username) throws IOException {
+        execute(bufferedReader, null, dbManager, username);
     }
 
-    public static ReportState execute(BufferedReader br, Route route, DataBase dbManager) throws IOException {
+    public static ReportState execute(BufferedReader br, Route route, DataBase dbManager, String username) throws IOException {
         String line = "";
         CommandsManager commandsManager = new CommandsManager();
         Show show = new Show();
@@ -91,7 +91,7 @@ public class Execute {
 
                         case "update":
                             if (ln.length == 2){
-                                if (dbManager.updateRouteByID(Integer.parseInt(ln[1]), route)) {
+                                if (dbManager.updateRouteByID(Integer.parseInt(ln[1]), route, username)) {
                                     commandsManager.updateByID(Integer.parseInt(ln[1]), route);
                                     ExecuteRequest.reportState = ReportState.OK;
                                 }
@@ -101,7 +101,7 @@ public class Execute {
                             break;
                         case "remove_by_id":
                             if (ln.length == 2){
-                                if (dbManager.removeRouteByID(Integer.parseInt(ln[1]), dbManager.getUsername())) {
+                                if (dbManager.removeRouteByID(Integer.parseInt(ln[1]), username)) {
                                     commandsManager.remove_by_id(Integer.parseInt(ln[1]));
                                     ExecuteRequest.reportState = ReportState.OK;
                                 }
@@ -111,8 +111,9 @@ public class Execute {
                             break;
                         case "clear":
                             if (ln.length == 1){
-                                if (dbManager.removeAll()) {
-                                    commandsManager.clear();
+                                if (dbManager.removeAll(username)) {
+                                    collectionManager.clear();
+                                    dbManager.extractCollectionFromDB();
                                     ExecuteRequest.reportState = ReportState.OK;
                                 }
                             } else {
@@ -147,7 +148,7 @@ public class Execute {
                             break;
                         case "remove_lower":
                             if (ln.length == 1){
-                                if (dbManager.removeLower(route)) {
+                                if (dbManager.removeLower(route, username)) {
                                     commandsManager.remove_lower(route);
                                     ExecuteRequest.reportState = ReportState.OK;
                                 }

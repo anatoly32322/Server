@@ -30,6 +30,7 @@ public class DataBase {
     private static final String CHECK_ID_EXISTENCE = "SELECT COUNT(*) FROM COLLECTION WHERE id = ?";
     private static final String IS_OWNER_REQUEST = "SELECT COUNT(*) FROM COLLECTION WHERE id = ? AND owner_ = ?";
     private static final String VALIDATE_USER_REQUEST = "SELECT COUNT(*) FROM USERS WHERE username = ? AND password = ?";
+    private static final String GET_MAX_ID = "SELECT MAX(id) AS id FROM COLLECTION";
     private static final String UPDATE_ROUTE_BY_ID = "";
     private static final String UPDATE_NAME_BY_ID = "UPDATE COLLECTION SET name_ = ? WHERE id = ?";
     private static final String UPDATE_X_BY_ID = "UPDATE COLLECTION SET x_coord = ? WHERE id = ?";
@@ -54,15 +55,16 @@ public class DataBase {
         this.password = password;
     }
 
-
     public String getUsername() {
-        return username;
+            return username;
     }
 
 
     public void connectToDatabase(){
         try {
-            connection = DriverManager.getConnection(URL, username, password);
+            synchronized (this){
+                connection = DriverManager.getConnection(URL, username, password);
+            }
             System.out.println("Подключение к базе данных успешно установлено!");
         } catch (SQLException throwables) {
             System.err.println("Не удалось установить соединение с базой данных. Завершение работы.");
@@ -173,7 +175,17 @@ public class DataBase {
 
 
     public Boolean addRouteIntoDB(Route route){
-        Integer id = route.getId();
+        Integer id = 0;
+        try {
+            PreparedStatement getMaxID = connection.prepareStatement(GET_MAX_ID);
+            ResultSet result = getMaxID.executeQuery();
+            if (result.next()) {
+                id = result.getInt("id");
+            }
+            id++;
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
         String name = route.getName();
         Coordinates coordinates = route.getCoordinates();
         Location from = route.getFrom();
@@ -209,7 +221,7 @@ public class DataBase {
             if (!checkID(id)) {
                 throw new NoSuchIDException();
             }
-            if (!isOwnerOf(id)) {
+            if (!isOwnerOf(id, initiator)) {
                 throw new NoRightsToTheFileException();
             }
             PreparedStatement removeRouteByIDRequest = connection.prepareStatement(REMOVE_ROUTE_BY_ID);
@@ -241,7 +253,7 @@ public class DataBase {
         return result.getInt(1) >= 1;
     }
 
-    public Boolean isOwnerOf(Integer id) throws SQLException {
+    public Boolean isOwnerOf(Integer id, String owner) throws SQLException {
         PreparedStatement isOwnerRequest = connection.prepareStatement(IS_OWNER_REQUEST);
         isOwnerRequest.setInt(1, id);
         isOwnerRequest.setString(2, owner);
@@ -259,7 +271,7 @@ public class DataBase {
         return result.getInt(1) >= 1;
     }
 
-    public Boolean updateRouteByID(Integer id, Route route){
+    public Boolean updateRouteByID(Integer id, Route route, String initiator){
         try {
             if (!checkID(id)){
                 throw new NoSuchIDException();
@@ -272,9 +284,9 @@ public class DataBase {
             String from = route.getFrom().getName();
             String to = route.getTo().getName();
             Double distance = route.getDistance();
-            if (updateNameByID(id, name) && updateXByID(id, x_coord) && updateYByID(id, y_coord) &&
-                    updateZByID(id, z_coord) && updateFromByID(id, from) &&
-                    updateToByID(id, to) && updateDistanceByID(id, distance)){
+            if (updateNameByID(id, name, initiator) && updateXByID(id, x_coord, initiator) && updateYByID(id, y_coord, initiator) &&
+                    updateZByID(id, z_coord, initiator) && updateFromByID(id, from, initiator) &&
+                    updateToByID(id, to, initiator) && updateDistanceByID(id, distance, initiator)){
                 System.out.println("Данные успешно обновлены!");
             }
 
@@ -288,9 +300,9 @@ public class DataBase {
         return true;
     }
 
-    public Boolean updateNameByID(Integer id, String name) throws SQLException {
+    public Boolean updateNameByID(Integer id, String name, String initiator) throws SQLException {
         try {
-            if (!isOwnerOf(id)) {
+            if (!isOwnerOf(id, initiator)) {
                 throw new NoRightsToTheFileException();
             }
             PreparedStatement updateNameByIDRequest = connection.prepareStatement(UPDATE_NAME_BY_ID);
@@ -305,9 +317,9 @@ public class DataBase {
         return true;
     }
 
-    public Boolean updateXByID(Integer id, Long x) throws SQLException {
+    public Boolean updateXByID(Integer id, Long x, String initiator) throws SQLException {
         try {
-            if (!isOwnerOf(id)) {
+            if (!isOwnerOf(id, initiator)) {
                 throw new NoRightsToTheFileException();
             }
             PreparedStatement updateXByIDRequest = connection.prepareStatement(UPDATE_X_BY_ID);
@@ -322,9 +334,9 @@ public class DataBase {
         return true;
     }
 
-    public Boolean updateYByID(Integer id, Double y) throws SQLException {
+    public Boolean updateYByID(Integer id, Double y, String initiator) throws SQLException {
         try {
-            if (!isOwnerOf(id)) {
+            if (!isOwnerOf(id, initiator)) {
                 throw new NoRightsToTheFileException();
             }
             PreparedStatement updateYByIDRequest = connection.prepareStatement(UPDATE_Y_BY_ID);
@@ -339,9 +351,9 @@ public class DataBase {
         return true;
     }
 
-    public Boolean updateZByID(Integer id, Double z) throws SQLException {
+    public Boolean updateZByID(Integer id, Double z, String initiator) throws SQLException {
         try {
-            if (!isOwnerOf(id)) {
+            if (!isOwnerOf(id, initiator)) {
                 throw new NoRightsToTheFileException();
             }
             PreparedStatement updateZByIDRequest = connection.prepareStatement(UPDATE_Z_BY_ID);
@@ -356,9 +368,9 @@ public class DataBase {
         return true;
     }
 
-    public Boolean updateFromByID(Integer id, String from) throws SQLException {
+    public Boolean updateFromByID(Integer id, String from, String initiator) throws SQLException {
         try {
-            if (!isOwnerOf(id)) {
+            if (!isOwnerOf(id, initiator)) {
                 throw new NoRightsToTheFileException();
             }
             PreparedStatement updateFromByIDRequest = connection.prepareStatement(UPDATE_FROM_BY_ID);
@@ -373,9 +385,9 @@ public class DataBase {
         return true;
     }
 
-    public Boolean updateToByID(Integer id, String to) throws SQLException {
+    public Boolean updateToByID(Integer id, String to, String initiator) throws SQLException {
         try {
-            if (!isOwnerOf(id)) {
+            if (!isOwnerOf(id, initiator)) {
                 throw new NoRightsToTheFileException();
             }
             PreparedStatement updateToByIDRequest = connection.prepareStatement(UPDATE_TO_BY_ID);
@@ -390,9 +402,9 @@ public class DataBase {
         return true;
     }
 
-    public Boolean updateDistanceByID(Integer id, Double distance) throws SQLException {
+    public Boolean updateDistanceByID(Integer id, Double distance, String initiator) throws SQLException {
         try {
-            if (!isOwnerOf(id)) {
+            if (!isOwnerOf(id, initiator)) {
                 throw new NoRightsToTheFileException();
             }
             PreparedStatement updateDistanceByIDRequest = connection.prepareStatement(UPDATE_DISTANCE_BY_ID);
@@ -407,10 +419,10 @@ public class DataBase {
         return true;
     }
 
-    public Boolean removeAll(){
+    public Boolean removeAll(String initiator){
         try {
             PreparedStatement removeAllRequest = connection.prepareStatement(REMOVE_ALL);
-            removeAllRequest.setString(1, owner);
+            removeAllRequest.setString(1, initiator);
             removeAllRequest.executeUpdate();
             removeAllRequest.close();
         } catch (SQLException e) {
@@ -420,9 +432,9 @@ public class DataBase {
         return true;
     }
 
-    public Boolean removeLower(Route route){
+    public Boolean removeLower(Route route, String initiator){
         try {
-            if (!isOwnerOf(route.getId())){
+            if (!isOwnerOf(route.getId(), initiator)){
                 throw new NoRightsToTheFileException();
             }
             PreparedStatement removeLower = connection.prepareStatement(REMOVE_LOWER);

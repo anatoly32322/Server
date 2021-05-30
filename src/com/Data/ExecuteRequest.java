@@ -27,7 +27,7 @@ public abstract class ExecuteRequest implements Runnable {
         ReportState stateAnswer = ReportState.OK;
         answer = new StringBuilder();
         try {
-            Execute.execute(brOfCommands, request.getObjectArgument() == "null" ? null : (Route)request.getObjectArgument(), dbManager);
+            Execute.execute(brOfCommands, request.getObjectArgument() == "null" ? null : (Route)request.getObjectArgument(), dbManager, request.getUsername());
             stateAnswer = ReportState.OK;
         } catch (ExitException e) {
             stateAnswer = ReportState.SERVER_DIE;

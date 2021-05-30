@@ -1,7 +1,8 @@
-package com.Server;
+package com;
 
 import com.AuxiliaryCommands.ReadDB;
 import com.Commands.Execute;
+import com.Server.Server;
 
 import java.io.BufferedReader;
 import java.io.IOException;

@@ -7,17 +7,20 @@ public class Request implements Serializable {
     private String commandName;
     private String argument;
     private Serializable objectArgument;
+    private String username;
 
-    public Request(String commandName, String argument, Serializable objectArgument){
+    public Request(String commandName, String argument, String username, Serializable objectArgument){
         this.commandName = commandName;
         this.argument = argument;
         this.objectArgument = objectArgument;
+        this.username = username;
     }
 
-    public Request(String commandName, String argument) {
+    public Request(String commandName, String argument, String username) {
         this.commandName = commandName;
         this.argument = argument;
         this.objectArgument = null;
+        this.username = username;
     }
 
     public Request() {
@@ -36,6 +39,10 @@ public class Request implements Serializable {
 
     public String getCommandName() {
         return commandName;
+    }
+
+    public String getUsername() {
+        return username;
     }
 
     public boolean isEmpty() {
